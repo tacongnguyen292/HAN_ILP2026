@@ -3192,13 +3192,13 @@ function renderRegister(){
         </div>
 
         <div class="field">
-          <label>Mã Số TVV <span style="color:var(--danger)">*</span></label>
-          <input type="text" id="f_cccd" maxlength="8" placeholder="Ví dụ: AG093725">
+          <label>Mã số TVV <span style="color:var(--danger)">*</span></label>
+          <input type="text" id="f_cccd" maxlength="8" inputmode="text" autocomplete="username" pattern="[A-Za-z0-9]{8}" placeholder="AG093725">
         </div>
 
         <div class="field">
           <label>Mã lớp học <span style="color:var(--danger)">*</span></label>
-          <input type="text" id="f_class" maxlength="10" placeholder="Ví dụ: ILP-190826">
+          <input type="text" id="f_class" maxlength="10" placeholder="ILP-190826">
           <p class="hint">Tối đa 10 ký tự. Do giảng viên cung cấp cho lớp học của bạn.</p>
         </div>
 
@@ -3231,7 +3231,7 @@ function bindRegisterEvents(){
     });
   });
   document.getElementById("f_cccd").addEventListener("input", (e)=>{
-    e.target.value = e.target.value.replace(/\D/g,"").slice(0,12);
+    e.target.value = e.target.value.replace(/[^A-Za-z0-9]/g,"").toUpperCase().slice(0,8);
   });
   document.getElementById("btn_register").onclick = ()=>{
     const name = document.getElementById("f_name").value.trim().toUpperCase();
@@ -3242,7 +3242,7 @@ function bindRegisterEvents(){
     const cccd = document.getElementById("f_cccd").value.trim();
     const classCode = document.getElementById("f_class").value.trim().toUpperCase();
     const err = document.getElementById("reg_error");
-    if(!name || !gender || !d || !m || !y || !/^\d{12}$/.test(cccd) || !classCode){
+    if(!name || !gender || !d || !m || !y || !/^[A-Za-z0-9]{8}$/.test(cccd) || !classCode){
       err.style.display = "block";
       return;
     }
