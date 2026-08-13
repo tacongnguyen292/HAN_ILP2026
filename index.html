@@ -2725,7 +2725,8 @@ const CALC_BANK = [{"sourceNo":1,"qHtml":"<div class=\"ilp-word-question\"><div 
 const PASS_THRESHOLD = 0.8;
 const EXAM_MINUTES = 60; // thời gian làm bài mặc định cho MỌI chủ đề và đề thi thử (phút)
 const ILP_GOOGLE_SHEET_PENDING = true;
-const SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyqS6fbo35HrnIEKwM6T7R5C5MQxMYCca4almAT1IO6miFMG_2-DZ9KoNDNuK60pjoPOQ/exec";
+/* GOOGLE SHEET ILP - TYPE/TITLE: TYPE=Thi thử ILP|Ôn tập OB; TITLE=Câu hỏi tính toán ILP|ILP1..ILP8|Tên chủ đề OB */
+const SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwMj6j3HMWOLvOfcfHMv8M_x98B9I4Mq4PkLUlfdSEbbz6P3OAojIUCmLS5q-ZuuZUH/exec";
 // Google Sheet backend normalizes timestamps to Asia/Ho_Chi_Minh (GMT+7). The app displays the device local time.
 // Đường dẫn ảnh nền cho màn hình đăng ký — thay bằng ảnh thật của công ty (ảnh đội ngũ tư vấn/lễ vinh danh...)
 // Đặt file ảnh cùng thư mục với index.html và sửa tên file bên dưới cho khớp.
@@ -3071,6 +3072,7 @@ function syncToSheet(type, payload){
     dob: profile ? profile.dob : "",
     gender: profile ? profile.gender : "",
     cccd: profile ? profile.cccd : "",
+    username: profile ? profile.cccd : "",
     classCode: profile ? profile.classCode : "",
     deviceId: getDeviceId()
   }, payload);
@@ -4000,6 +4002,8 @@ function finishQuiz(timeUp){
       kind,
       itemId:item.id,
       itemName:item.name,
+      title: (kind==="topic" ? "Ôn tập OB" : "Thi Thử ILP"),
+      typeLabel: (kind==="calc" ? "Câu hỏi Tính toán ILP" : item.name),
       score,
       correct,
       total,
