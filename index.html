@@ -2724,7 +2724,7 @@ const CALC_BANK = [{"sourceNo":1,"qHtml":"<div class=\"ilp-word-question\"><div 
    ========================================================================== */
 const PASS_THRESHOLD = 0.8;
 const EXAM_MINUTES = 60; // thời gian làm bài mặc định cho MỌI chủ đề và đề thi thử (phút)
-const ILP_GOOGLE_SHEET_PENDING = true;
+const ILP_GOOGLE_SHEET_PENDING = false;
 /* GOOGLE SHEET ILP - TYPE/TITLE: TYPE=Thi thử ILP|Ôn tập OB; TITLE=Câu hỏi tính toán ILP|ILP1..ILP8|Tên chủ đề OB */
 const SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwMj6j3HMWOLvOfcfHMv8M_x98B9I4Mq4PkLUlfdSEbbz6P3OAojIUCmLS5q-ZuuZUH/exec";
 // Google Sheet backend normalizes timestamps to Asia/Ho_Chi_Minh (GMT+7). The app displays the device local time.
@@ -3062,11 +3062,13 @@ function getGradeLabel(score){
 /* ==========================================================================
    ĐỒNG BỘ GOOGLE SHEET (tùy chọn)
    ========================================================================== */
-function syncToSheet(type, payload){
-  if(!SHEET_WEBHOOK_URL || SHEET_WEBHOOK_URL.includes("PASTE_GOOGLE_APPS_SCRIPT")) return;
+async function syncToSheet(type, payload){
+  if(!SHEET_WEBHOOK_URL) return;
+
   const profile = getProfile();
   const body = Object.assign({
-    type, timestamp: new Date().toISOString(),
+    type: type,
+    timestamp: new Date().toISOString(),
     studentKey: studentKey(profile),
     name: profile ? profile.name : "",
     dob: profile ? profile.dob : "",
@@ -3075,14 +3077,37 @@ function syncToSheet(type, payload){
     username: profile ? profile.cccd : "",
     classCode: profile ? profile.classCode : "",
     deviceId: getDeviceId()
-  }, payload);
-  fetch(SHEET_WEBHOOK_URL, {
-    method:"POST",
-    mode:"no-cors",
-    headers:{"Content-Type":"text/plain"},
-    body: JSON.stringify(body)
-  }).catch(()=>{});
+  }, payload || {});
+
+  const json = JSON.stringify(body);
+
+  // Gửi text/plain để Apps Script nhận ổn định từ file HTML/local browser.
+  try{
+    await fetch(SHEET_WEBHOOK_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: {"Content-Type":"text/plain;charset=utf-8"},
+      body: json,
+      keepalive: true
+    });
+    return true;
+  }catch(err){
+    // Fallback cho trình duyệt chặn fetch khi trang đang đóng/chuyển trang.
+    try{
+      const blob = new Blob([json], {type:"text/plain;charset=utf-8"});
+      navigator.sendBeacon(SHEET_WEBHOOK_URL, blob);
+    }catch(_){}
+    return false;
+  }
 }
+function getSheetSyncStatus(){
+  return {
+    url: SHEET_WEBHOOK_URL,
+    configured: !!SHEET_WEBHOOK_URL,
+    profile: !!getProfile()
+  };
+}
+
 function getDeviceId(){
   let id = localStorage.getItem("iq_device_id");
   if(!id){ id = "dev_"+Math.random().toString(36).slice(2,10)+Date.now().toString(36); localStorage.setItem("iq_device_id", id); }
