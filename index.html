@@ -3258,7 +3258,7 @@ function bindRegisterEvents(){
     });
   });
   document.getElementById("f_cccd").addEventListener("input", (e)=>{
-    e.target.value = e.target.value.replace(/[^A-Za-z0-9]/g,"").toUpperCase().slice(0,8);
+    e.target.value = e.target.value.replace(/[^0-9]/g,"").slice(0,12);
   });
   document.getElementById("btn_register").onclick = ()=>{
     const name = document.getElementById("f_name").value.trim().toUpperCase();
